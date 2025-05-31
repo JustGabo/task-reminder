@@ -11,7 +11,7 @@ export default function AppNavigator() {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{headerShown: false}}>
       {!isLoggedIn ? (
         <Stack.Screen name="Login">
           {props => <LoginScreen {...props} onLogin={() => setIsLoggedIn(true)} />}
