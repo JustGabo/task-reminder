@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Platform,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
-  View,
+  View
 } from 'react-native';
+import { supabase } from '../lib/supabase';
+// import { AuthContext } from '../../context/AuthContext';
 
-// Mock data for static display
+// Datos simulados (mock)
 const MOCK_TASKS = [
   {
     id: '1',
@@ -19,7 +20,7 @@ const MOCK_TASKS = [
     dueDate: '2024-05-06',
     type: 'homework',
     status: 'pending',
-    score: 'No tiene puntuación'
+    score: 'No tiene puntuación',
   },
   {
     id: '2',
@@ -31,7 +32,8 @@ const MOCK_TASKS = [
     type: 'assignment',
     status: 'pending',
     score: '2 puntos',
-    description: 'El liderazgo es la capacidad de influir en un grupo de personas para que trabajen juntos y alcancen un objetivo común.'
+    description:
+      'El liderazgo es la capacidad de influir en un grupo de personas para que trabajen juntos y alcancen un objetivo común.',
   },
   {
     id: '3',
@@ -42,8 +44,8 @@ const MOCK_TASKS = [
     dueDate: '2024-09-06',
     type: 'assignment',
     status: 'pending',
-    score: '2 puntos'
-  }
+    score: '2 puntos',
+  },
 ];
 
 const SubjectIcon = ({ subject }) => {
@@ -96,37 +98,55 @@ const TaskCard = ({ task }) => {
         <Text style={styles.taskDescription}>{task.description}</Text>
       )}
 
-      <Text style={styles.professorText}>
-        Prof. {task.professor}
-      </Text>
-
-      <Text style={styles.dueDate}>
-        Fecha de entrega: {formatDate(task.dueDate)}
-      </Text>
+      <Text style={styles.professorText}>Prof. {task.professor}</Text>
+      <Text style={styles.dueDate}>Fecha de entrega: {formatDate(task.dueDate)}</Text>
     </View>
   );
 };
 
 export default function DashboardScreen() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user.user_metadata.nombre_completo.toLowerCase().split(' ')[0]);
+    };
+    getUser();
+  }, []);
+
+  useEffect(()=>{
+    console.log(user)
+  },[user])
+
   return (
-    <SafeAreaView style={styles.container}>
+    <ScrollView style={styles.container}>
+      {/* <TouchableOpacity onPress={() => logout()}>
+        <Text>Cerrar sesión</Text>
+      </TouchableOpacity> */}
+
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Mis Tareas</Text>
-        <Text style={styles.headerSubtitle}>
-          {MOCK_TASKS.length} tareas pendientes
-        </Text>
+        <Text style={styles.headerSubtitle}>Bienvenido</Text>
+        <Text style={styles.headerTitle}>{user}</Text>
       </View>
 
+      <View style={styles.mainContainer}>
+      <Text style={styles.homeWorkTitle}>Mis Tareas</Text>
+        {/* <Text style={styles.headerSubtitle}>
+          {MOCK_TASKS.length} tareas pendientes
+        </Text> */}
       <ScrollView
+
         style={styles.tasksContainer}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.tasksContent}
-      >
+        >
         {MOCK_TASKS.map((task) => (
           <TaskCard key={task.id} task={task} />
         ))}
       </ScrollView>
-    </SafeAreaView>
+        </View>
+    </ScrollView>
   );
 }
 
@@ -134,29 +154,44 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f7f7f7',
+    paddingTop: 30,
   },
   header: {
     padding: 20,
     paddingTop: Platform.OS === 'android' ? 40 : 20,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
   headerTitle: {
-    fontSize: 34,
+    fontSize: 22,
     fontWeight: '700',
+    color: '#333',
+    marginBottom: 4,
+    textTransform: 'capitalize',
+  },
+  homeWorkTitle: {
+    fontSize: 16,
+    fontWeight: '500',
     color: '#000',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   headerSubtitle: {
-    fontSize: 16,
+    fontSize: 13,
     color: '#666',
+    fontWeight:500,
+    textTransform: 'capitalize',
+  },
+  mainContainer: {
+    padding: 20,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 10,
   },
   tasksContainer: {
     flex: 1,
   },
   tasksContent: {
-    padding: 16,
+    // padding: 16,
   },
   taskCard: {
     backgroundColor: '#fff',
@@ -177,71 +212,66 @@ const styles = StyleSheet.create({
   },
   taskHeader: {
     flexDirection: 'row',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   subjectIconContainer: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     borderRadius: 12,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 12,
   },
   subjectIconText: {
-    fontSize: 24,
+    fontSize: 20,
   },
   taskHeaderContent: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
   },
   subjectContainer: {
     flex: 1,
   },
   subjectText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#000',
-    marginBottom: 4,
+    color: '#333',
   },
   sectionText: {
     fontSize: 14,
-    color: '#666',
+    color: '#888',
   },
   scoreContainer: {
-    backgroundColor: '#f8f8f8',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    marginLeft: 8,
+    backgroundColor: '#E0F7FA',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
   },
   scoreText: {
-    fontSize: 13,
-    color: '#666',
+    fontSize: 12,
+    color: '#007AFF',
     fontWeight: '500',
   },
   taskTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 12,
-    lineHeight: 24,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#222',
+    marginBottom: 4,
   },
   taskDescription: {
-    fontSize: 15,
-    color: '#666',
-    marginBottom: 12,
-    lineHeight: 22,
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 8,
   },
   professorText: {
     fontSize: 14,
-    color: '#666',
-    fontStyle: 'italic',
-    marginBottom: 8,
+    color: '#777',
+    marginBottom: 2,
   },
   dueDate: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 13,
+    color: '#999',
   },
 });

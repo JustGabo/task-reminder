@@ -2,27 +2,27 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { supabase } from '../lib/supabase';
 
-export default function LoginScreen() {
+export default function SignUpScreen() {
   const [matricula, setMatricula] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
-  const handleLogin = async () => {
+  const handleSignUp = async () => {
     try {
       // Validaciones iniciales
       if (!matricula || !password) {
@@ -33,75 +33,77 @@ export default function LoginScreen() {
       // Validate matricula format: YY-XXXX-X-XXX
       const matriculaRegex = /^\d{2}-[A-Z]{4}-\d{1}-\d{3}$/;
       if (!matriculaRegex.test(matricula)) {
-        Alert.alert('Error', 'La matrícula debe tener el formato: YY-XXXX-X-XXX');
+        Alert.alert('Error', 'La matrícula debe tener el formato: YY-XXXX-X-XXX\nEjemplo: 23-EISN-9-123');
         return;
       }
 
-      // Validate password (6 digits)
-      if (!/^\d{6}$/.test(password)) {
-        Alert.alert('Error', 'La contraseña debe ser de 6 dígitos numéricos');
+      const passwordErrors = validatePassword(password);
+      if (passwordErrors.length > 0) {
+        Alert.alert('Error', 'La contraseña debe tener:\n' + passwordErrors.join('\n'));
         return;
       }
 
       setIsLoading(true);
 
-      // 1. Primero validamos con el backend de INTEC
-      const backendResponse = await fetch('https://homework-backend-production.up.railway.app/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ matricula, password }),
-      });
+      try {
+        const backendResponse = await fetch('https://homework-backend-production.up.railway.app/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ matricula, password }),
+        });
 
-      if (!backendResponse.ok) {
-        const data = await backendResponse.json();
-        throw new Error(data.message || 'Credenciales inválidas');
-      }
-
-      const userData = await backendResponse.json();
-      const { nombreCompleto, primerNombre } = userData;
-
-      // 2. Si las credenciales son válidas en INTEC, intentamos login en Supabase
-      const email = `${matricula}@gmail.com`;
-      const { data: supabaseData, error: supabaseError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (supabaseError) {
-        // Si el usuario no existe en Supabase, lo registramos
-        if (supabaseError.message.includes('Invalid login credentials')) {
-          const { error: signUpError } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-              data: {
-                matricula,
-                email_verified: true,
-                nombre_completo: nombreCompleto,
-                primer_nombre: primerNombre,
-              },
-            },
-          });
-
-          if (signUpError) throw signUpError;
-          
-          Alert.alert(
-            'Cuenta creada',
-            'Tu cuenta ha sido creada automáticamente. Por favor, inicia sesión nuevamente.',
-            [{ text: 'OK' }]
-          );
-          return;
+        const userData = await backendResponse.json();
+        
+        if (!backendResponse.ok) {
+          throw new Error(userData.message || 'Credenciales inválidas');
         }
-        throw supabaseError;
-      }
 
-      router.replace('/');
+        const { nombreCompleto, primerNombre } = userData;
+
+        // 2. Si las credenciales son válidas, registrar en Supabase
+        const email = `${matricula}@gmail.com`;
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              matricula,
+              email_verified: true,
+              nombre_completo: nombreCompleto,
+              primer_nombre: primerNombre,
+            },
+          },
+        });
+
+        if (signUpError) {
+          throw signUpError;
+        }
+
+        Alert.alert(
+          'Registro exitoso',
+          'Tu cuenta ha sido creada correctamente',
+          [{ text: 'OK', onPress: () => router.replace('login') }]
+        );
+      } catch (fetchError) {
+        throw fetchError;
+      }
 
     } catch (error) {
-      Alert.alert('Error', error.message || 'No se pudo iniciar sesión');
+      Alert.alert('Error', error.message || 'No se pudo completar el registro');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const validatePassword = (pass) => {
+    const isNumeric = /^\d{6}$/.test(pass);
+    const errors = [];
+    
+    if (!isNumeric) {
+      errors.push('La contraseña debe ser de 6 dígitos numéricos');
+    }
+
+    return errors;
   };
 
   return (
@@ -116,8 +118,8 @@ export default function LoginScreen() {
             style={styles.logo}
             resizeMode="contain"
           /> */}
-          <Text style={styles.title}>Login</Text>
-          <Text style={styles.subtitle}>Sign in if you already have an account.</Text>
+          <Text style={styles.title}>Register</Text>
+          <Text style={styles.subtitle}>Create an account to get started on loate.</Text>
         </View>
 
         <View style={styles.formContainer}>
@@ -135,7 +137,7 @@ export default function LoginScreen() {
               placeholder="Matrícula"
               placeholderTextColor="#A0A0A0"
               autoCapitalize="characters"
-              maxLength={15}
+              maxLength={15}  // Length including hyphens
               returnKeyType="next"
             />
           </View>
@@ -144,7 +146,9 @@ export default function LoginScreen() {
             <TextInput
               style={styles.input}
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => {
+                setPassword(text);
+              }}
               secureTextEntry={!showPassword}
               placeholder="Password"
               placeholderTextColor="#A0A0A0"
@@ -163,24 +167,29 @@ export default function LoginScreen() {
               />
             </TouchableOpacity>
           </View>
+          {/* <Text style={styles.passwordHelper}>
+            La contraseña debe ser tu PIN de INTEC (6 dígitos)
+          </Text> */}
 
           <TouchableOpacity
-            style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
-            onPress={handleLogin}
+            style={[styles.registerButton, isLoading && styles.registerButtonDisabled]}
+            onPress={() => {
+              handleSignUp();
+            }}
             disabled={isLoading}
             activeOpacity={0.7}
           >
             {isLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.loginButtonText}>Login</Text>
+              <Text style={styles.registerButtonText}>Register</Text>
             )}
           </TouchableOpacity>
 
-          <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => router.replace('signup')}>
-              <Text style={styles.registerLink}>Register</Text>
+          <View style={styles.loginContainer}>
+            <Text style={styles.loginText}>Already have an account? </Text>
+            <TouchableOpacity onPress={() => router.replace('login')}>
+              <Text style={styles.loginLink}>Login</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -241,35 +250,43 @@ const styles = StyleSheet.create({
     right: 16,
     top: 16,
   },
-  loginButton: {
+  registerButton: {
     backgroundColor: '#000',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
+    marginTop: 8,
     marginBottom: 24,
   },
-  loginButtonDisabled: {
+  registerButtonDisabled: {
     opacity: 0.7,
   },
-  loginButtonText: {
+  registerButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'Inter_600SemiBold',
   },
-  registerContainer: {
+  loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  registerText: {
+  loginText: {
     color: '#666',
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
   },
-  registerLink: {
+  loginLink: {
     color: '#007AFF',
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
   },
-});
+  passwordHelper: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 8,
+    marginLeft: 4,
+    lineHeight: 18,
+  },
+}); 
