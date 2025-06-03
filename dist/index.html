@@ -14,6 +14,10 @@
   <body>
     <div id="root"></div>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <script src="/_expo/static/js/web/entry-5bb3082be25ea8eefbc525fdfc5834f9.js" defer></script>
+    <script type="module">
+      import('/browser-e8502e9de8d0bc6843e8affbdb1b30b7.js').then(() => {
+        import('/_expo/static/js/web/entry-5bb3082be25ea8eefbc525fdfc5834f9.js');
+      });
+    </script>
   </body>
 </html> 

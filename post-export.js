@@ -36,6 +36,14 @@ if (fs.existsSync(imagesDir)) {
   });
 }
 
+// Copy browser.js to root of dist
+const browserJsPath = path.join(distDir, '_expo', 'static', 'js', 'web', 'browser-e8502e9de8d0bc6843e8affbdb1b30b7.js');
+if (fs.existsSync(browserJsPath)) {
+  const destPath = path.join(distDir, 'browser-e8502e9de8d0bc6843e8affbdb1b30b7.js');
+  fs.copyFileSync(browserJsPath, destPath);
+  console.log('Copied browser.js to dist root');
+}
+
 // Ensure we don't delete the _expo directory and its contents
 const expoStaticDir = path.join(distDir, '_expo', 'static');
 if (fs.existsSync(expoStaticDir)) {
