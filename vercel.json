@@ -5,9 +5,9 @@
       "src": "/_expo/static/js/web/(.*)\\.js$",
       "headers": { 
         "cache-control": "public, max-age=31536000, immutable",
-        "content-type": "application/javascript; charset=utf-8"
+        "content-type": "application/javascript"
       },
-      "continue": true
+      "dest": "/_expo/static/js/web/$1.js"
     },
     {
       "src": "/_expo/static/(.*)",
