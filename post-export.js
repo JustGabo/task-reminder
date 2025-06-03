@@ -34,4 +34,10 @@ if (fs.existsSync(imagesDir)) {
     fs.copyFileSync(srcPath, destPath);
     console.log(`Copied ${file} to ${path.relative(__dirname, destPath)}`);
   });
+}
+
+// Ensure we don't delete the _expo directory and its contents
+const expoStaticDir = path.join(distDir, '_expo', 'static');
+if (fs.existsSync(expoStaticDir)) {
+  console.log('Preserving _expo/static directory');
 } 
