@@ -1,15 +1,17 @@
 {
   "version": 2,
   "routes": [
+    { "handle": "filesystem" },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
     {
       "src": "/(.*)",
       "dest": "/index.html"
     }
   ],
-  "builds": [
-    {
-      "src": "dist/**",
-      "use": "@vercel/static"
-    }
-  ]
+  "buildCommand": "npm run build:web",
+  "outputDirectory": "dist",
+  "framework": "create-react-app"
 } 
