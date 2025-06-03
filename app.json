@@ -22,6 +22,7 @@
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png",
+      "publicPath": "/assets/",
       "manifest": {
         "short_name": "Task Reminder",
         "name": "Task Reminder",
@@ -32,12 +33,12 @@
         "description": "Don't forget your tasks ever again!",
         "icons": [
           {
-            "src": "./assets/images/icon.png",
+            "src": "/assets/images/icon.png",
             "sizes": "192x192",
             "type": "image/png"
           },
           {
-            "src": "./assets/images/icon.png",
+            "src": "/assets/images/icon.png",
             "sizes": "512x512",
             "type": "image/png"
           }
@@ -60,6 +61,9 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ]
   }
 }

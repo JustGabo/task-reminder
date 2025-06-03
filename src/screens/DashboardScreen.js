@@ -115,10 +115,6 @@ export default function DashboardScreen() {
     getUser();
   }, []);
 
-  useEffect(()=>{
-    console.log(user)
-  },[user])
-
   return (
     <ScrollView style={styles.container}>
       {/* <TouchableOpacity onPress={() => logout()}>
