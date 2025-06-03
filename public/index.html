@@ -10,29 +10,24 @@
     <link rel="apple-touch-icon" href="/assets/images/icon.png" />
     <title>Task Reminder</title>
     <script>
-      // Initialize Metro bundler globals
       window.__DEV__ = false;
       window.__METRO_GLOBAL_PREFIX__ = '';
-      window.process = window.process || { env: {} };
+      window.process = window.process || {};
+      window.process.env = window.process.env || {};
       window.__BUNDLE_START_TIME__ = Date.now();
-      function metroDefine(moduleId, deps, factory) {
-        window.__d = window.__d || function(moduleId, deps, factory) {
-          if (typeof factory === 'function') {
-            window[moduleId] = factory();
-          } else {
-            window[moduleId] = factory;
-          }
-        };
-        window.__d(moduleId, deps, factory);
-      }
-      window.__d = metroDefine;
+      window.__d = function(factory, moduleId, dependencyMap) {
+        if (typeof factory === 'function') {
+          return factory();
+        }
+        return factory;
+      };
     </script>
     <script type="module">globalThis.__EXPO_ROUTER_HYDRATE__ = true;</script>
   </head>
   <body>
     <div id="root"></div>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <script src="/_expo/static/js/web/browser-e8502e9de8d0bc6843e8affbdb1b30b7.js"></script>
-    <script src="/_expo/static/js/web/entry-5bb3082be25ea8eefbc525fdfc5834f9.js"></script>
+    <script src="/_expo/static/js/web/browser-e8502e9de8d0bc6843e8affbdb1b30b7.js" defer></script>
+    <script src="/_expo/static/js/web/entry-5bb3082be25ea8eefbc525fdfc5834f9.js" defer></script>
   </body>
 </html> 
