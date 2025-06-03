@@ -9,7 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "build:web": "npx expo export && node post-export.js"
+    "build:web": "npx expo export && cp statics/* dist/"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.1",
@@ -64,6 +64,5 @@
     "eslint-config-expo": "~9.2.0",
     "typescript": "~5.8.3"
   },
-  "private": true,
-  "outputDirectory": "dist"
+  "private": true
 }
